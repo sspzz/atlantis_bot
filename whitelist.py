@@ -13,8 +13,9 @@ class WhitelistEntry(Base):
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-dbpw = ""
-db = "postgresql://postgres:{}@db.rkqrkdnzfukpkeasaezn.supabase.co:6543/postgres".format(dbpw)
+dbpw = "YOUR_PASS"
+dbid = "YOUR_DBID"
+db = "postgresql://postgres:{}@db.{}.supabase.co:6543/postgres".format(dbpw, dbid)
 
 engine = create_engine(db, echo=True, future=True)
 Base.metadata.create_all(engine)
@@ -39,8 +40,8 @@ def delete_entry(user_id: int, guild_id: int):
 		return True
 	return False
 
-def get_entries(guildId):
-	return session.query(WhitelistEntry).filter(WhitelistEntry.guildId == guildId).all()
+def get_entries(guild_id: int):
+	return session.query(WhitelistEntry).filter(WhitelistEntry.guildId == guild_id).all()
 
-def get_entry(userId, guildId):
-	return session.query(WhitelistEntry).filter(WhitelistEntry.userId == userId and WhitelistEntry.guildId == guildI).first()
+def get_entry(user_id: int, guild_id: int):
+	return session.query(WhitelistEntry).filter(WhitelistEntry.userId == user_id and WhitelistEntry.guildId == guild_id).first()

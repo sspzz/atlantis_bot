@@ -54,10 +54,12 @@ def is_admin():
 	return commands.check(predicate)
 
 def has_access():
+
 	def predicate(ctx):
-		channel_ok = ctx.message.channel.id == 437876896664125443 #???
-		role_id = 930398242540249090 #918603419646832710
-		role_ok = wl_role = discord.utils.find(lambda r: r.id == role_id, ctx.message.guild.roles) in ctx.message.author.roles
+		channel_id = 437876896664125443
+		channel_ok = ctx.message.channel.id == channel_id
+		role_id = 930398242540249090#918603419646832710
+		role_ok = discord.utils.find(lambda r: r.id == role_id, ctx.message.guild.roles) in ctx.message.author.roles
 		return channel_ok and role_ok
 	return commands.check(predicate)
 
@@ -65,13 +67,7 @@ def has_access():
 @bot.command(name="whitelist", aliases=["wl"])
 async def show_whitelist(ctx):
 	wl = whitelist.get_entries(ctx.guild.id)
-
-	if len(wl) < 1:
-		await ctx.send("No wallets in whitelist.")
-		return
-
-	lines = list(map(lambda e: e.wallet, wl))
-	await DiscordUtils.embed(ctx=ctx, title="Whitelist wallets", description=", ".join(lines))
+	await DiscordUtils.embed(ctx=ctx, title="Whitelist", description="There are currently {} wallets on the whitelist.".format(len(wl)))
 
 @has_access()
 @bot.command(name="reg")
