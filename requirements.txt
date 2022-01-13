@@ -1,0 +1,4 @@
+json
+discord
+web3
+psycopg2-binary
