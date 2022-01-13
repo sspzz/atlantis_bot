@@ -13,17 +13,16 @@ class WhitelistEntry(Base):
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-dbpw = "YOUR_PASS"
-dbid = "YOUR_DBID"
+dbpw = ""
+dbid = ""
 db = "postgresql://postgres:{}@db.{}.supabase.co:6543/postgres".format(dbpw, dbid)
 
-engine = create_engine(db, echo=True, future=True)
+engine = create_engine(db, echo=False, future=True)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
-session = Session()
 
-def save_entry(user_id: int, wallet: str, guild_id: int):
-	r = get_entry(user_id, guild_id)
+def save_entry(session: Session, user_id: int, wallet: str, guild_id: int):
+	r = get_entry(session, user_id, guild_id)
 	if r is not None:
 		r.wallet = wallet
 		session.add(r)
@@ -32,16 +31,47 @@ def save_entry(user_id: int, wallet: str, guild_id: int):
 		session.add(e)
 	session.commit()
 
-def delete_entry(user_id: int, guild_id: int):
-	r = get_entry(user_id, guild_id)
+def delete_entry(session: Session, user_id: int, guild_id: int) -> bool:
+	r = get_entry(session, user_id, guild_id)
 	if r is not None:
 		session.delete(r)
 		session.commit()
 		return True
 	return False
 
-def get_entries(guild_id: int):
-	return session.query(WhitelistEntry).filter(WhitelistEntry.guildId == guild_id).all()
+def get_entries(session: Session, guild_id: int):
+	return session \
+		.query(WhitelistEntry) \
+		.filter(WhitelistEntry.guildId == guild_id) \
+		.all()
 
-def get_entry(user_id: int, guild_id: int):
-	return session.query(WhitelistEntry).filter(WhitelistEntry.userId == user_id and WhitelistEntry.guildId == guild_id).first()
+def get_entry(session: Session, user_id: int, guild_id: int):
+	return session \
+		.query(WhitelistEntry) \
+		.filter(WhitelistEntry.userId == user_id and WhitelistEntry.guildId == guild_id) \
+		.first()
+
+
+class Whitelist(object):
+	@staticmethod
+	def add(user_id: int, wallet: str, guild_id: int):
+		with Session() as session:
+			save_entry(session, user_id, wallet, guild_id)
+
+	@staticmethod
+	def remove(user_id: int, guild_id: int) -> bool:
+		with Session() as session:
+			return delete_entry(session, user_id, guild_id)
+		return False
+	
+	@staticmethod
+	def check(user_id: int, guild_id: int) -> bool:
+		with Session() as session:
+			return get_entry(session, user_id, guild_id) is not None
+		return False
+
+	@staticmethod
+	def count(guild_id: int) -> int:
+		with Session() as session:
+			return len(get_entries(session, guild_id))
+		return 0

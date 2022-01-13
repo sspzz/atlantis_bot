@@ -3,7 +3,7 @@ import discord
 import logging
 import logging.config
 import json
-import whitelist
+from whitelist import Whitelist
 from web3 import Web3
 
 # Utilities related to Discord
@@ -54,11 +54,10 @@ def is_admin():
 	return commands.check(predicate)
 
 def has_access():
-
 	def predicate(ctx):
-		channel_id = 437876896664125443
+		channel_id = 437876896664125443 	# ???
+		role_id = 930398242540249090 		# 918603419646832710
 		channel_ok = ctx.message.channel.id == channel_id
-		role_id = 930398242540249090#918603419646832710
 		role_ok = discord.utils.find(lambda r: r.id == role_id, ctx.message.guild.roles) in ctx.message.author.roles
 		return channel_ok and role_ok
 	return commands.check(predicate)
@@ -66,14 +65,14 @@ def has_access():
 @is_admin()
 @bot.command(name="whitelist", aliases=["wl"])
 async def show_whitelist(ctx):
-	wl = whitelist.get_entries(ctx.guild.id)
-	await DiscordUtils.embed(ctx=ctx, title="Whitelist", description="There are currently {} wallets on the whitelist.".format(len(wl)))
+	count = Whitelist.count(ctx.guild.id)
+	await DiscordUtils.embed(ctx=ctx, title="Whitelist", description="There are currently {} wallets on the whitelist.".format(count))
 
 @has_access()
 @bot.command(name="reg")
 async def reg_whitelist(ctx, wallet):
 	if Web3.isAddress(wallet):
-		whitelist.save_entry(ctx.message.author.id, wallet, ctx.message.guild.id)
+		Whitelist.add(ctx.message.author.id, wallet, ctx.message.guild.id)
 		await ctx.message.add_reaction('✅')
 	else:
 		await ctx.message.add_reaction('❌')
@@ -81,7 +80,7 @@ async def reg_whitelist(ctx, wallet):
 @has_access()
 @bot.command(name="unreg")
 async def unreg_whitelist(ctx):
-	if whitelist.delete_entry(ctx.message.author.id, ctx.guild.id):
+	if Whitelist.remove(ctx.message.author.id, ctx.guild.id):
 		await ctx.message.add_reaction('✅')
 	else:
 		await ctx.message.add_reaction('❌')
@@ -89,8 +88,7 @@ async def unreg_whitelist(ctx):
 @has_access()
 @bot.command(name="check")
 async def check_whitelist(ctx):
-	user = whitelist.get_entry(ctx.message.author.id, ctx.guild.id)
-	if user is not None:
+	if Whitelist.check(ctx.message.author.id, ctx.guild.id):
 		await ctx.message.add_reaction('✅')
 	else:
 		await ctx.message.add_reaction('❌')
