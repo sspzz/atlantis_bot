@@ -44,22 +44,15 @@ logging.basicConfig(filename='atlantis_bot.log',
 logger = logging.getLogger('atlantis_bot')
 
 
-def get_admins():
-	with open('admins.txt', 'r') as file:
-		return [int(line.rstrip()) for line in file.readlines()]
-	return []
-
 def is_admin():
 	def predicate(ctx):
-		return ctx.message.author.id in get_admins()
+		return ctx.message.author.id in config.discord_admins
 	return commands.check(predicate)
 
 def has_access():
 	def predicate(ctx):
-		channel_id = 437876896664125443 	# ???
-		role_id = 930398242540249090 		# 918603419646832710
-		channel_ok = ctx.message.channel.id == channel_id
-		role_ok = discord.utils.find(lambda r: r.id == role_id, ctx.message.guild.roles) in ctx.message.author.roles
+		channel_ok = ctx.message.channel.id == config.discord_channel_id
+		role_ok = discord.utils.find(lambda r: r.id == config.discord_role_id, ctx.message.guild.roles) in ctx.message.author.roles
 		return channel_ok and role_ok
 	return commands.check(predicate)
 
