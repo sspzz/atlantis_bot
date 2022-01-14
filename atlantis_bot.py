@@ -5,6 +5,7 @@ import logging.config
 import json
 from whitelist import Whitelist
 from web3 import Web3
+import config
 
 # Utilities related to Discord
 class DiscordUtils:
@@ -98,8 +99,6 @@ async def check_whitelist(ctx):
 # Run bot
 #
 try:
-	file = open('creds.json', 'r')
-	access_token = json.load(file)['access_token']	
-	bot.run(access_token)
+	bot.run(config.discord_access_token)
 except:
 	print("Missing or faulty creds.json")

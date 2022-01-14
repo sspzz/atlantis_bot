@@ -1,6 +1,9 @@
+import config
 from sqlalchemy import Column, BigInteger, String, ForeignKey, Table
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 
@@ -10,14 +13,7 @@ class WhitelistEntry(Base):
 	guildId = Column(BigInteger, primary_key=True)
 	wallet = Column(String)
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-dbpw = ""
-dbid = ""
-db = "postgresql://postgres:{}@db.{}.supabase.co:6543/postgres".format(dbpw, dbid)
-
-engine = create_engine(db, echo=False, future=True)
+engine = create_engine(config.db_path, echo=False, future=True)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
