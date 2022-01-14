@@ -44,6 +44,9 @@ logging.basicConfig(filename='atlantis_bot.log',
 logger = logging.getLogger('atlantis_bot')
 
 
+#
+# Commands
+#
 def is_admin():
 	def predicate(ctx):
 		return ctx.message.author.id in config.discord_admins
@@ -91,7 +94,4 @@ async def check_whitelist(ctx):
 #
 # Run bot
 #
-try:
-	bot.run(config.discord_access_token)
-except:
-	print("Missing or faulty creds.json")
+bot.run(config.discord_access_token)
