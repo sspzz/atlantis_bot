@@ -4,7 +4,6 @@ import logging
 import logging.config
 import json
 from whitelist import Whitelist
-from web3 import Web3
 import config
 
 # Utilities related to Discord
@@ -68,27 +67,22 @@ async def show_whitelist(ctx):
 @has_access()
 @bot.command(name="reg")
 async def reg_whitelist(ctx, wallet):
-	if Web3.isAddress(wallet):
-		Whitelist.add(ctx.message.author.id, wallet, ctx.message.guild.id)
-		await ctx.message.add_reaction('✅')
-	else:
-		await ctx.message.add_reaction('❌')
+	logger.info("REG - user: %s, guild: %s, wallet: %s", ctx.message.author.id, ctx.message.guild.id, wallet)
+	success = Whitelist.add(ctx.message.author.id, wallet, ctx.message.guild.id)
+	await ctx.message.add_reaction('✅' if success else '❌')
 
 @has_access()
 @bot.command(name="unreg")
 async def unreg_whitelist(ctx):
-	if Whitelist.remove(ctx.message.author.id, ctx.guild.id):
-		await ctx.message.add_reaction('✅')
-	else:
-		await ctx.message.add_reaction('❌')
+	logger.info("UNREG - user: %s, guild: %s", ctx.message.author.id, ctx.message.guild.id)
+	success = Whitelist.remove(ctx.message.author.id, ctx.guild.id)
+	await ctx.message.add_reaction('✅' if success else '❌')
 
 @has_access()
 @bot.command(name="check")
 async def check_whitelist(ctx):
-	if Whitelist.check(ctx.message.author.id, ctx.guild.id):
-		await ctx.message.add_reaction('✅')
-	else:
-		await ctx.message.add_reaction('❌')
+	success = Whitelist.check(ctx.message.author.id, ctx.guild.id)
+	await ctx.message.add_reaction('✅' if success else '❌')
 
 
 #

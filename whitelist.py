@@ -1,4 +1,5 @@
 import config
+from web3 import Web3
 from sqlalchemy import Column, BigInteger, String, ForeignKey, Table
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
@@ -50,9 +51,12 @@ def get_entry(session: Session, user_id: int, guild_id: int):
 
 class Whitelist(object):
 	@staticmethod
-	def add(user_id: int, wallet: str, guild_id: int):
-		with Session() as session:
-			save_entry(session, user_id, wallet, guild_id)
+	def add(user_id: int, wallet: str, guild_id: int) -> bool:
+		if Web3.isAddress(wallet):
+			with Session() as session:
+				save_entry(session, user_id, wallet, guild_id)
+				return True
+		return False
 
 	@staticmethod
 	def remove(user_id: int, guild_id: int) -> bool:
