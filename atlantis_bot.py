@@ -81,8 +81,11 @@ async def unreg_whitelist(ctx):
 @has_access()
 @bot.command(name="check")
 async def check_whitelist(ctx):
-	success = Whitelist.check(ctx.message.author.id, ctx.guild.id)
-	await ctx.message.add_reaction('✅' if success else '❌')
+	wallet = Whitelist.check(ctx.message.author.id, ctx.guild.id)
+	if wallet is not None:
+		await ctx.reply('You have registered {}'.format(wallet))
+	else:
+		await ctx.reply('You have not registered your wallet')
 
 
 #
